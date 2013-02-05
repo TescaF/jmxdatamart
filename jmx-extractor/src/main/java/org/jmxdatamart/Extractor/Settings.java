@@ -29,6 +29,7 @@
 package org.jmxdatamart.Extractor;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import java.io.*;
 import java.util.*;
@@ -140,6 +141,11 @@ public class Settings {
     }
     
     public Settings() {
+        this.pollingRate = 15;
+        this.folderLocation = "/";
+        this.url = "service:jmx:rmi:///jndi/rmi://:9999/jmxrmi";
+        this.beans = new ArrayList();
+    	
         XStream xstream = new XStream(new DomDriver());
         xstream.aliasField("BeanList", Settings.class, "beans");
         xstream.aliasField("AttributeList", MBeanData.class, "attributes");
@@ -194,7 +200,12 @@ public class Settings {
         xstream.alias("Bean", MBeanData.class);
         xstream.alias("Attribute", Attribute.class);
 
-        Settings settings = (Settings)xstream.fromXML(s);
+        Settings settings;
+        try {
+        	settings = (Settings)xstream.fromXML(s);
+        } catch(XStreamException x) {
+        	settings = new Settings();
+        }
         settings.sanitize();
         return settings;
     }
